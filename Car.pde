@@ -103,7 +103,7 @@ class Car {
     }
     Wall wall=pointGates.get(checkPoint);
     if ((linesTouching(bottomRight.x, bottomRight.y, bottomLeft.x, bottomLeft.y, wall.x1, wall.y1, wall.x2, wall.y2))||(linesTouching(topLeft.x, topLeft.y, topRight.x, topRight.y, wall.x1, wall.y1, wall.x2, wall.y2))) {
-      point+=200;
+      point+=20;
       lastPoint=p.copy();
       checkPoint--;
       if (checkPoint < 0) {
@@ -133,45 +133,50 @@ class Car {
       }
     }
 
-    for (int i=0; i<sensor.length; i++) {
+    for (int i: new int[]{1, 7}) {
       PVector sensorLine=new PVector(sensor[i], 0).rotate(heading.heading()+(PI/4)*i); 
       PVector sensorPoint=PVector.add(center, sensorLine);
-      // //line(center.x, center.y, sensorPoint.x, sensorPoint.y);
-      // stroke(255);
-      // strokeWeight(1);
-      // float len = 8;
-      // line(sensorPoint.x-len, sensorPoint.y, sensorPoint.x+len, sensorPoint.y);
-      // line(sensorPoint.x, sensorPoint.y-len, sensorPoint.x, sensorPoint.y+len);
+      //line(center.x, center.y, sensorPoint.x, sensorPoint.y);
+      stroke(255);
+      strokeWeight(1);
+      float len = 8;
+      line(sensorPoint.x-len, sensorPoint.y, sensorPoint.x+len, sensorPoint.y);
+      line(sensorPoint.x, sensorPoint.y-len, sensorPoint.x, sensorPoint.y+len);
     }
   }
   //----------------------------------------------------------------------------------------------------------------------
   void think() {
     if (!dead) {
       float [] input=new float[layer[0]];
-      for (int i=0; i<sensor.length; i++) {
-        input[i]=sensor[i]/sensorDistance;
-      }
+      // for (int i=0; i<sensor.length; i++) {
+      //   input[i]=sensor[i]/sensorDistance;
+      // }
+
+      input[0] = sensor[1]/sensorDistance;
+      input[1] = sensor[7]/sensorDistance;
+      input[2] = v.mag()/5;
 
       float [] output=brain.feedForward(input);
 
-      if (output [0]>=output[1])
+      if (output [0]>=output[1]&&(output[0]>output[2]))
         throttle();
-      else if (output[2]>=output[3])
+      else if (output[2]>=output[1]&&(output[2]>=output[0]))
         brake();
 
-      if ((output[4]>output[5])&&(output[4]>output[6]))
+      if ((output[3]>output[4])&&(output[3]>output[5]))
         heading.rotate(radians(-2.5));
-      else if ((output[5]>output[4])&&(output[5]>output[6]))
+      else if ((output[4]>output[3])&&(output[4]>output[5]))
         heading.rotate(radians(2.5));
     }
   }
   //----------------------------------------------------------------------------------------------------------------
   float getFitness() {
     float lastPointDistance=PVector.sub(p, lastPoint).mag();
-    float score = point + (millis() - population.time)/1000;
+    float score = point;
+    //  + (millis() - population.time)/1000;
     if (checkPoint != pointGates.size() - 1)
-      score += lastPointDistance / 20;
-    return score;
+      score += lastPointDistance / 40;
+    return score * score;
   }
 
   void pick() {

@@ -26,9 +26,9 @@ PImage raceTrack;
 PVector camera;
 PVector cameraHeading;
 
-int [] layer={8, 12,10, 7};
+int [] layer={3, 5, 6};
 
-int clones= 80;
+int clones= 40;
 int roundTime=15;
 int generation=1;
 
@@ -58,6 +58,7 @@ public void setup() {
   netboard = new NetBoard();
   font=createFont("Calibri", 32);
   textAlign(CENTER);
+  frameRate(40);
 
   camera=new PVector(width/2, height/2);
   
@@ -76,7 +77,7 @@ public void setup() {
 
   population=new Population();
 
-  // loadBrain();
+  loadBrain();
   //roundTime=100;
   cameraHeading=PVector.fromAngle(PI / 2 - cars.get(0).v.heading());
 }
@@ -106,9 +107,9 @@ public void draw() {
 
   population.update();
 
-  for (Wall pointGate : pointGates) {
-    pointGate.show();
-  }
+  // for (Wall pointGate : pointGates) {
+  //   pointGate.show();
+  // }
 
   //for (Wall wall : walls) {
   //  wall.show();
@@ -345,7 +346,7 @@ public void saveBrain() {
   saveJSONObject(brain, "data/brain.json");
 }
 class Population {
-  float mutationRate=0.005f;
+  float mutationRate=0.02f;
 
   int time;
   int alive;
@@ -406,16 +407,15 @@ class Population {
     }
 
     if (highest>60)
-      roundTime=12+PApplet.parseInt(highest/2500);
+      roundTime=PApplet.parseInt(sqrt(highest)/10);
     else
-      roundTime=5;
+      roundTime=6;
     if (roundTime>180)
       roundTime=180;
+    println(sqrt(highest));
 
     for (Car car : cars) {
-      float chance=acceptReject(car.getFitness(), highest);
-      if(highest > 100)
-        chance = 10;
+      float chance=sqrt(car.getFitness())*20/sqrt(highest);
       for (int i=1; i<chance; i++) {
         parentPool.add(car.copy());
       }
@@ -426,38 +426,33 @@ class Population {
     //  ellipse(parentPool.get(i).p.x, parentPool.get(i).p.y, 100, 100);
     //  //println(i,cars.indexOf(parentPool.get(i)),parentPool.get(i).getFitness());
     //}
-    
+    println("parentpool:",parentPool.size());
 
     Collections.shuffle(parentPool);
 
     if (parentPool.size()>0) {
     for (int i = 0; i < cars.size(); i++) {
-      if(i < cars.size() * 3 / 4){
+      // if(i < cars.size() * 3 / 4){
         int indexA=floor(random(parentPool.size()));
-        // int indexB=floor(random(parentPool.size()));
-        cars.get(i).brain=best.brain.copy();
-        }
-      else{
-        int indexA = floor(random(parentPool.size()));
-        int indexB = floor(random(parentPool.size()));
-        cars.get(i).brain = parentPool.get(indexA).brain.crossover(parentPool.get(indexB).brain);
-      }
+        cars.get(i).brain=parentPool.get(indexA).brain.copy();
+        // }
+      // else{
+      //   int indexA = floor(random(parentPool.size()));
+      //   int indexB = floor(random(parentPool.size()));
+      //   cars.get(i).brain = parentPool.get(indexA).brain.crossover(parentPool.get(indexB).brain);
+      // }
       }
     }
 
     Collections.shuffle(cars);
 
-    for (int i = 0; i < cars.size() * 0.02f; i++) {
-      cars.set(cars.size() - (i + 1), best.copy());
-    }
-
     for (int i = 0; i < clones * 7 / 8; i++) {
-      cars.get(i).brain.mutate(0.1f);
+      cars.get(i).brain.mutate(mutationRate);
       cars.get(i).reset();
-    }
+    } 
     
     for (int i = clones * 7 / 8; i < clones; i++) {
-      cars.get(i).brain.mutate(mutationRate);
+      cars.get(i).brain.mutate(0.1f);
       cars.get(i).reset();
     }
     best.reset();
@@ -592,7 +587,7 @@ class Car {
     }
     Wall wall=pointGates.get(checkPoint);
     if ((linesTouching(bottomRight.x, bottomRight.y, bottomLeft.x, bottomLeft.y, wall.x1, wall.y1, wall.x2, wall.y2))||(linesTouching(topLeft.x, topLeft.y, topRight.x, topRight.y, wall.x1, wall.y1, wall.x2, wall.y2))) {
-      point+=200;
+      point+=20;
       lastPoint=p.copy();
       checkPoint--;
       if (checkPoint < 0) {
@@ -622,45 +617,50 @@ class Car {
       }
     }
 
-    for (int i=0; i<sensor.length; i++) {
+    for (int i: new int[]{1, 7}) {
       PVector sensorLine=new PVector(sensor[i], 0).rotate(heading.heading()+(PI/4)*i); 
       PVector sensorPoint=PVector.add(center, sensorLine);
-      // //line(center.x, center.y, sensorPoint.x, sensorPoint.y);
-      // stroke(255);
-      // strokeWeight(1);
-      // float len = 8;
-      // line(sensorPoint.x-len, sensorPoint.y, sensorPoint.x+len, sensorPoint.y);
-      // line(sensorPoint.x, sensorPoint.y-len, sensorPoint.x, sensorPoint.y+len);
+      //line(center.x, center.y, sensorPoint.x, sensorPoint.y);
+      stroke(255);
+      strokeWeight(1);
+      float len = 8;
+      line(sensorPoint.x-len, sensorPoint.y, sensorPoint.x+len, sensorPoint.y);
+      line(sensorPoint.x, sensorPoint.y-len, sensorPoint.x, sensorPoint.y+len);
     }
   }
   //----------------------------------------------------------------------------------------------------------------------
   public void think() {
     if (!dead) {
       float [] input=new float[layer[0]];
-      for (int i=0; i<sensor.length; i++) {
-        input[i]=sensor[i]/sensorDistance;
-      }
+      // for (int i=0; i<sensor.length; i++) {
+      //   input[i]=sensor[i]/sensorDistance;
+      // }
+
+      input[0] = sensor[1]/sensorDistance;
+      input[1] = sensor[7]/sensorDistance;
+      input[2] = v.mag()/5;
 
       float [] output=brain.feedForward(input);
 
-      if (output [0]>=output[1])
+      if (output [0]>=output[1]&&(output[0]>output[2]))
         throttle();
-      else if (output[2]>=output[3])
+      else if (output[2]>=output[1]&&(output[2]>=output[0]))
         brake();
 
-      if ((output[4]>output[5])&&(output[4]>output[6]))
+      if ((output[3]>output[4])&&(output[3]>output[5]))
         heading.rotate(radians(-2.5f));
-      else if ((output[5]>output[4])&&(output[5]>output[6]))
+      else if ((output[4]>output[3])&&(output[4]>output[5]))
         heading.rotate(radians(2.5f));
     }
   }
   //----------------------------------------------------------------------------------------------------------------
   public float getFitness() {
     float lastPointDistance=PVector.sub(p, lastPoint).mag();
-    float score = point + (millis() - population.time)/1000;
+    float score = point;
+    //  + (millis() - population.time)/1000;
     if (checkPoint != pointGates.size() - 1)
-      score += lastPointDistance / 20;
-    return score;
+      score += lastPointDistance / 40;
+    return score * score;
   }
 
   public void pick() {
@@ -1131,32 +1131,41 @@ class NetBoard {
       float valueActive    = output.get(0, 0) ;
       float valueDeactive  = output.get(1, 0) ;
       fill(0, 255);
-      if (valueActive > valueDeactive)
+      /*
+      if (output [0]>=output[1]&&(output[0]>output[2]))
+        throttle();
+      else if (output[2]>=output[1]&&(output[2]>=output[0]))
+        brake();
+
+      if ((output[3]>output[4])&&(output[3]>output[5]))
+        heading.rotate(radians(-2.5));
+      else if ((output[4]>output[3])&&(output[4]>output[5]))
+        heading.rotate(radians(2.5));
+      */
+      if (output.get(0, 0)>=output.get(1, 0) && output.get(0, 0)>output.get(2, 0))
         decision.fill(0, 255, 0);
       else
         decision.fill(255, 0, 0);
       decision.text("GAS", x + 1, y + 5);
 
-      y              = 50 + 40 * (3.5f  + 1 - layer[layer.length - 1]) / 2 + scroll;
-      valueActive    = output.get(2, 0) ;
-      valueDeactive  = output.get(3, 0) ;
-      if (valueActive > valueDeactive)
+
+      y = 50 + 40 * (3.5f  + 1 - layer[layer.length - 1]) / 2 + scroll;
+      if (output.get(2, 0)>=output.get(1, 0) && output.get(2, 0)>=output.get(0, 0))
         decision.fill(0, 255, 0);
       else
         decision.fill(255, 0, 0);
       decision.text("REM", x + 1, y + 5);
 
-      y              = 50 + 40 * (7.5f  + 1 - layer[layer.length - 1]) / 2 + scroll;
-      valueActive    = output.get(4, 0) ;
-      if ((valueActive > output.get(5, 0))&&(valueActive > output.get(6, 0)))
+
+      y = 50 + 40 * (5.5f  + 1 - layer[layer.length - 1]) / 2 + scroll;
+      if (output.get(3, 0)>output.get(4, 0) && output.get(3, 0)>output.get(5, 0))
         decision.fill(0, 255, 0);
       else
         decision.fill(255, 0, 0);
       decision.text("KIRI", x + 1, y + 5);
 
-      y              = 50 + 40 * (9.5f  + 1 - layer[layer.length - 1]) / 2 + scroll;
-      valueActive    = output.get(5, 0) ;
-      if ((valueActive > output.get(4, 0))&&(valueActive > output.get(6, 0)))
+      y = 50 + 40 * (7.5f  + 1 - layer[layer.length - 1]) / 2 + scroll;
+      if (output.get(4, 0)>output.get(3, 0) && output.get(4, 0)>output.get(5, 0))
         decision.fill(0, 255, 0);
       else
         decision.fill(255, 0, 0);

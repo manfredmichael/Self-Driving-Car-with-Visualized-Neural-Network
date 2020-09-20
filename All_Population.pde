@@ -1,5 +1,5 @@
 class Population {
-  float mutationRate=0.005;
+  float mutationRate=0.02;
 
   int time;
   int alive;
@@ -60,16 +60,15 @@ class Population {
     }
 
     if (highest>60)
-      roundTime=12+int(highest/2500);
+      roundTime=int(sqrt(highest)/10);
     else
-      roundTime=5;
+      roundTime=6;
     if (roundTime>180)
       roundTime=180;
+    println(sqrt(highest));
 
     for (Car car : cars) {
-      float chance=acceptReject(car.getFitness(), highest);
-      if(highest > 100)
-        chance = 10;
+      float chance=sqrt(car.getFitness())*20/sqrt(highest);
       for (int i=1; i<chance; i++) {
         parentPool.add(car.copy());
       }
@@ -80,38 +79,33 @@ class Population {
     //  ellipse(parentPool.get(i).p.x, parentPool.get(i).p.y, 100, 100);
     //  //println(i,cars.indexOf(parentPool.get(i)),parentPool.get(i).getFitness());
     //}
-    
+    println("parentpool:",parentPool.size());
 
     Collections.shuffle(parentPool);
 
     if (parentPool.size()>0) {
     for (int i = 0; i < cars.size(); i++) {
-      if(i < cars.size() * 3 / 4){
+      // if(i < cars.size() * 3 / 4){
         int indexA=floor(random(parentPool.size()));
-        // int indexB=floor(random(parentPool.size()));
-        cars.get(i).brain=best.brain.copy();
-        }
-      else{
-        int indexA = floor(random(parentPool.size()));
-        int indexB = floor(random(parentPool.size()));
-        cars.get(i).brain = parentPool.get(indexA).brain.crossover(parentPool.get(indexB).brain);
-      }
+        cars.get(i).brain=parentPool.get(indexA).brain.copy();
+        // }
+      // else{
+      //   int indexA = floor(random(parentPool.size()));
+      //   int indexB = floor(random(parentPool.size()));
+      //   cars.get(i).brain = parentPool.get(indexA).brain.crossover(parentPool.get(indexB).brain);
+      // }
       }
     }
 
     Collections.shuffle(cars);
 
-    for (int i = 0; i < cars.size() * 0.02; i++) {
-      cars.set(cars.size() - (i + 1), best.copy());
-    }
-
     for (int i = 0; i < clones * 7 / 8; i++) {
-      cars.get(i).brain.mutate(0.1);
+      cars.get(i).brain.mutate(mutationRate);
       cars.get(i).reset();
-    }
+    } 
     
     for (int i = clones * 7 / 8; i < clones; i++) {
-      cars.get(i).brain.mutate(mutationRate);
+      cars.get(i).brain.mutate(0.1);
       cars.get(i).reset();
     }
     best.reset();

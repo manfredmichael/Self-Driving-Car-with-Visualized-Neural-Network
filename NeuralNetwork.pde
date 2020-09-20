@@ -224,32 +224,41 @@ class NetBoard {
       float valueActive    = output.get(0, 0) ;
       float valueDeactive  = output.get(1, 0) ;
       fill(0, 255);
-      if (valueActive > valueDeactive)
+      /*
+      if (output [0]>=output[1]&&(output[0]>output[2]))
+        throttle();
+      else if (output[2]>=output[1]&&(output[2]>=output[0]))
+        brake();
+
+      if ((output[3]>output[4])&&(output[3]>output[5]))
+        heading.rotate(radians(-2.5));
+      else if ((output[4]>output[3])&&(output[4]>output[5]))
+        heading.rotate(radians(2.5));
+      */
+      if (output.get(0, 0)>=output.get(1, 0) && output.get(0, 0)>output.get(2, 0))
         decision.fill(0, 255, 0);
       else
         decision.fill(255, 0, 0);
       decision.text("GAS", x + 1, y + 5);
 
-      y              = 50 + 40 * (3.5  + 1 - layer[layer.length - 1]) / 2 + scroll;
-      valueActive    = output.get(2, 0) ;
-      valueDeactive  = output.get(3, 0) ;
-      if (valueActive > valueDeactive)
+
+      y = 50 + 40 * (3.5  + 1 - layer[layer.length - 1]) / 2 + scroll;
+      if (output.get(2, 0)>=output.get(1, 0) && output.get(2, 0)>=output.get(0, 0))
         decision.fill(0, 255, 0);
       else
         decision.fill(255, 0, 0);
       decision.text("REM", x + 1, y + 5);
 
-      y              = 50 + 40 * (7.5  + 1 - layer[layer.length - 1]) / 2 + scroll;
-      valueActive    = output.get(4, 0) ;
-      if ((valueActive > output.get(5, 0))&&(valueActive > output.get(6, 0)))
+
+      y = 50 + 40 * (5.5  + 1 - layer[layer.length - 1]) / 2 + scroll;
+      if (output.get(3, 0)>output.get(4, 0) && output.get(3, 0)>output.get(5, 0))
         decision.fill(0, 255, 0);
       else
         decision.fill(255, 0, 0);
       decision.text("KIRI", x + 1, y + 5);
 
-      y              = 50 + 40 * (9.5  + 1 - layer[layer.length - 1]) / 2 + scroll;
-      valueActive    = output.get(5, 0) ;
-      if ((valueActive > output.get(4, 0))&&(valueActive > output.get(6, 0)))
+      y = 50 + 40 * (7.5  + 1 - layer[layer.length - 1]) / 2 + scroll;
+      if (output.get(4, 0)>output.get(3, 0) && output.get(4, 0)>output.get(5, 0))
         decision.fill(0, 255, 0);
       else
         decision.fill(255, 0, 0);

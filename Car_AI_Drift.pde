@@ -8,9 +8,9 @@ PImage raceTrack;
 PVector camera;
 PVector cameraHeading;
 
-int [] layer={8, 12,10, 7};
+int [] layer={3, 5, 6};
 
-int clones= 80;
+int clones= 40;
 int roundTime=15;
 int generation=1;
 
@@ -40,6 +40,7 @@ void setup() {
   netboard = new NetBoard();
   font=createFont("Calibri", 32);
   textAlign(CENTER);
+  frameRate(40);
 
   camera=new PVector(width/2, height/2);
   
@@ -58,7 +59,7 @@ void setup() {
 
   population=new Population();
 
-  // loadBrain();
+  loadBrain();
   //roundTime=100;
   cameraHeading=PVector.fromAngle(PI / 2 - cars.get(0).v.heading());
 }
@@ -88,9 +89,9 @@ void draw() {
 
   population.update();
 
-  for (Wall pointGate : pointGates) {
-    pointGate.show();
-  }
+  // for (Wall pointGate : pointGates) {
+  //   pointGate.show();
+  // }
 
   //for (Wall wall : walls) {
   //  wall.show();
