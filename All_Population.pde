@@ -68,7 +68,7 @@ class Population {
     println(sqrt(highest));
 
     for (Car car : cars) {
-      float chance=sqrt(car.getFitness())*20/sqrt(highest);
+      float chance=car.getFitness()*20/highest;
       for (int i=1; i<chance; i++) {
         parentPool.add(car.copy());
       }

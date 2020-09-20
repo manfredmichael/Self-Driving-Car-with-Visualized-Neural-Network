@@ -26,7 +26,7 @@ PImage raceTrack;
 PVector camera;
 PVector cameraHeading;
 
-int [] layer={3, 5, 6};
+int [] layer={4, 6, 6};
 
 int clones= 40;
 int roundTime=15;
@@ -77,7 +77,7 @@ public void setup() {
 
   population=new Population();
 
-  loadBrain();
+  // loadBrain();
   //roundTime=100;
   cameraHeading=PVector.fromAngle(PI / 2 - cars.get(0).v.heading());
 }
@@ -415,7 +415,7 @@ class Population {
     println(sqrt(highest));
 
     for (Car car : cars) {
-      float chance=sqrt(car.getFitness())*20/sqrt(highest);
+      float chance=car.getFitness()*20/highest;
       for (int i=1; i<chance; i++) {
         parentPool.add(car.copy());
       }
@@ -635,10 +635,12 @@ class Car {
       // for (int i=0; i<sensor.length; i++) {
       //   input[i]=sensor[i]/sensorDistance;
       // }
+      // input[input.length-1] = v.mag()/5;
 
-      input[0] = sensor[1]/sensorDistance;
-      input[1] = sensor[7]/sensorDistance;
-      input[2] = v.mag()/5;
+      input[0] = sensor[0]/sensorDistance;
+      input[1] = sensor[1]/sensorDistance;
+      input[2] = sensor[7]/sensorDistance;
+      input[3] = v.mag()/5;
 
       float [] output=brain.feedForward(input);
 
@@ -1090,7 +1092,7 @@ class NetBoard {
     image(board, boardX, 0);
     image(decision, boardX + size + margin, 0);
     board.beginDraw();
-    board.background(255);
+    board.background(51);
     NeuralNetwork nn = cars.get(0).brain;
     for ( int i = 0; i < nn.perceptrons.size(); i++) {
       for ( int j = 0; j < layer[i]; j++) {
@@ -1103,13 +1105,14 @@ class NetBoard {
             float yo = 50 + 40 * (k * 2  + 1 - layer[i + 1]) / 2 + scroll;
             float w  = nn.weights.get(i).get(k, j);
             if (w>0)
-              board.stroke(0, 255, 0, 128 * abs(w));
+              board.stroke(145, 209, 139, 128 * abs(w));
             else
-              board.stroke(255, 0, 0, 128 * abs(w));
+              board.stroke(254, 133, 133, 128 * abs(w));
+            board.strokeWeight(1.5f);
             board.line(x, y, xo, yo);
           }
         }
-        board.stroke(0);
+        board.noStroke();
         board.fill(100 + 155 * value);
         board.ellipse(x, y, 30, 30);
         board.textAlign(CENTER);
@@ -1124,7 +1127,7 @@ class NetBoard {
     if (nn.perceptrons.size() > 0) {
       Matrix output = nn.perceptrons.get(nn.perceptrons.size() - 1);
       decision.beginDraw();
-      decision.background(255);
+      decision.background(51);
       decision.textAlign(CORNER, CENTER);
       float x              = 0;
       float y              = 50 + 40 * (-0.5f  + 1 - layer[layer.length - 1]) / 2 + scroll;

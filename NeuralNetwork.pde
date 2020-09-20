@@ -183,7 +183,7 @@ class NetBoard {
     image(board, boardX, 0);
     image(decision, boardX + size + margin, 0);
     board.beginDraw();
-    board.background(255);
+    board.background(51);
     NeuralNetwork nn = cars.get(0).brain;
     for ( int i = 0; i < nn.perceptrons.size(); i++) {
       for ( int j = 0; j < layer[i]; j++) {
@@ -196,13 +196,14 @@ class NetBoard {
             float yo = 50 + 40 * (k * 2  + 1 - layer[i + 1]) / 2 + scroll;
             float w  = nn.weights.get(i).get(k, j);
             if (w>0)
-              board.stroke(0, 255, 0, 128 * abs(w));
+              board.stroke(145, 209, 139, 128 * abs(w));
             else
-              board.stroke(255, 0, 0, 128 * abs(w));
+              board.stroke(254, 133, 133, 128 * abs(w));
+            board.strokeWeight(1.5);
             board.line(x, y, xo, yo);
           }
         }
-        board.stroke(0);
+        board.noStroke();
         board.fill(100 + 155 * value);
         board.ellipse(x, y, 30, 30);
         board.textAlign(CENTER);
@@ -217,7 +218,7 @@ class NetBoard {
     if (nn.perceptrons.size() > 0) {
       Matrix output = nn.perceptrons.get(nn.perceptrons.size() - 1);
       decision.beginDraw();
-      decision.background(255);
+      decision.background(51);
       decision.textAlign(CORNER, CENTER);
       float x              = 0;
       float y              = 50 + 40 * (-0.5  + 1 - layer[layer.length - 1]) / 2 + scroll;

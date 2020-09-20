@@ -151,10 +151,12 @@ class Car {
       // for (int i=0; i<sensor.length; i++) {
       //   input[i]=sensor[i]/sensorDistance;
       // }
+      // input[input.length-1] = v.mag()/5;
 
-      input[0] = sensor[1]/sensorDistance;
-      input[1] = sensor[7]/sensorDistance;
-      input[2] = v.mag()/5;
+      input[0] = sensor[0]/sensorDistance;
+      input[1] = sensor[1]/sensorDistance;
+      input[2] = sensor[7]/sensorDistance;
+      input[3] = v.mag()/5;
 
       float [] output=brain.feedForward(input);
 
