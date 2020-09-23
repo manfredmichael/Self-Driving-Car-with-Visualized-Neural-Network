@@ -10,7 +10,7 @@ PVector cameraHeading;
 
 int [] layer={4, 6, 6};
 
-int clones= 40;
+int clones= 80;
 int roundTime=15;
 int generation=1;
 
@@ -20,6 +20,7 @@ boolean left=false;
 boolean right=false;
 boolean makingWall=false;
 boolean showBoard = false;
+boolean showBest = false;
 
 float prevMouseX=0;
 float prevMouseY=0;
@@ -52,6 +53,7 @@ void setup() {
 
   lines=new JSONArray();
   loadLine();
+  
 
   for (int i=0; i<clones; i++) {
     cars.add(new Car());
@@ -134,25 +136,27 @@ void keyPressed() {
   //}
   if ((key == 's')||(key == 'S'))
     showBoard = !showBoard;
-  if (keyCode==LEFT)
-    left=true;
-  if (keyCode==RIGHT)
-    right=true;
-  if (keyCode==UP)
-    throttle=true;
-  if (keyCode==DOWN)
-    brake=true;
+  if(key == 'b' || key == 'B')
+    showBest = !showBest;
+//   if (keyCode==LEFT)
+//     left=true;
+//   if (keyCode==RIGHT)
+//     right=true;
+//   if (keyCode==UP)
+//     throttle=true;
+//   if (keyCode==DOWN)
+//     brake=true;
 }
 
 void keyReleased() {
-  if (keyCode==LEFT)
-    left=false;
-  if (keyCode==RIGHT)
-    right=false;
-  if (keyCode==UP)
-    throttle=false;
-  if (keyCode==DOWN)
-    brake=false;
+  // if (keyCode==LEFT)
+  //   left=false;
+  // if (keyCode==RIGHT)
+  //   right=false;
+  // if (keyCode==UP)
+  //   throttle=false;
+  // if (keyCode==DOWN)
+  //   brake=false;
 }
 
 

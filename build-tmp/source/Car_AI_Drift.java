@@ -28,7 +28,7 @@ PVector cameraHeading;
 
 int [] layer={4, 6, 6};
 
-int clones= 40;
+int clones= 80;
 int roundTime=15;
 int generation=1;
 
@@ -38,6 +38,7 @@ boolean left=false;
 boolean right=false;
 boolean makingWall=false;
 boolean showBoard = false;
+boolean showBest = false;
 
 float prevMouseX=0;
 float prevMouseY=0;
@@ -70,6 +71,7 @@ public void setup() {
 
   lines=new JSONArray();
   loadLine();
+  
 
   for (int i=0; i<clones; i++) {
     cars.add(new Car());
@@ -152,25 +154,27 @@ public void keyPressed() {
   //}
   if ((key == 's')||(key == 'S'))
     showBoard = !showBoard;
-  if (keyCode==LEFT)
-    left=true;
-  if (keyCode==RIGHT)
-    right=true;
-  if (keyCode==UP)
-    throttle=true;
-  if (keyCode==DOWN)
-    brake=true;
+  if(key == 'b' || key == 'B')
+    showBest = !showBest;
+//   if (keyCode==LEFT)
+//     left=true;
+//   if (keyCode==RIGHT)
+//     right=true;
+//   if (keyCode==UP)
+//     throttle=true;
+//   if (keyCode==DOWN)
+//     brake=true;
 }
 
 public void keyReleased() {
-  if (keyCode==LEFT)
-    left=false;
-  if (keyCode==RIGHT)
-    right=false;
-  if (keyCode==UP)
-    throttle=false;
-  if (keyCode==DOWN)
-    brake=false;
+  // if (keyCode==LEFT)
+  //   left=false;
+  // if (keyCode==RIGHT)
+  //   right=false;
+  // if (keyCode==UP)
+  //   throttle=false;
+  // if (keyCode==DOWN)
+  //   brake=false;
 }
 
 
@@ -365,7 +369,6 @@ class Population {
     alive=0;
     for (Car car : cars) {
       car.move();
-      car.show();
       car.checkCrash();
       car.sense();
       car.think();
@@ -374,6 +377,14 @@ class Population {
       if (!car.dead && car.checkPoint < pointGates.size() - 1)
         alive++;
     }
+
+    if(!showBest){
+      tint(255, 100);
+      for (Car car : cars)
+        car.show();
+      tint(255, 255);
+    }
+    cars.get(0).show();
 
     //displayBestStat();
 
@@ -406,7 +417,7 @@ class Population {
       }
     }
 
-    if (highest>60)
+    if (sqrt(highest)>60)
       roundTime=PApplet.parseInt(sqrt(highest)/10);
     else
       roundTime=6;
@@ -432,15 +443,15 @@ class Population {
 
     if (parentPool.size()>0) {
     for (int i = 0; i < cars.size(); i++) {
-      // if(i < cars.size() * 3 / 4){
+      if(i < cars.size() * 3 / 4){
         int indexA=floor(random(parentPool.size()));
         cars.get(i).brain=parentPool.get(indexA).brain.copy();
-        // }
-      // else{
-      //   int indexA = floor(random(parentPool.size()));
-      //   int indexB = floor(random(parentPool.size()));
-      //   cars.get(i).brain = parentPool.get(indexA).brain.crossover(parentPool.get(indexB).brain);
-      // }
+        }
+      else{
+        int indexA = floor(random(parentPool.size()));
+        int indexB = floor(random(parentPool.size()));
+        cars.get(i).brain = parentPool.get(indexA).brain.crossover(parentPool.get(indexB).brain);
+      }
       }
     }
 
@@ -458,7 +469,7 @@ class Population {
     best.reset();
     best.think();
     cars.set(0, best.copy());
-    saveBrain();
+    // saveBrain();
   }
 }
 
@@ -496,7 +507,7 @@ class Car {
   float wheelBase=15;
   float steerAngle=0;
   float maxSteer=25;
-  float maxSpeed=10;
+  float maxSpeed=5;
   float traveled;
   int point=0;
   int checkPoint;
@@ -534,6 +545,8 @@ class Car {
       if (rotationSpeed<=-PI)
         rotationSpeed=PI*2+rotationSpeed;
       v.rotate(rotationSpeed/40);
+
+      v.limit(maxSpeed);
       p.add(v);
       traveled+=v.mag();
       v.div(1.005f);
@@ -553,12 +566,25 @@ class Car {
     //rect(-10, 0, 45, 20);
     popMatrix();
   }
+
+  public void showAsBest() {
+    pushMatrix();
+    translate(p.x, p.y);
+    rotate(heading.heading());
+    stroke(255);    
+    image(carImage, -32, -12);
+    //line(0, -100, 0, 100);
+    //line(-100, 0, 100, 0);
+    //rectMode(CENTER);
+    //fill(255, 100);
+    //rect(-10, 0, 45, 20);
+    popMatrix();
+  }
   //----------------------------------------------------------------------------------
   public void throttle() {
     PVector direction=new PVector(0.12f, 0);
     direction.rotate(heading.heading());
     v.add(direction);
-    //v.limit(maxSpeed);
   }
 
   public void brake() {
@@ -637,7 +663,7 @@ class Car {
       // }
       // input[input.length-1] = v.mag()/5;
 
-      input[0] = sensor[0]/sensorDistance;
+      input[0] = degreeFloor(heading.heading() - v.heading()) / 45;
       input[1] = sensor[1]/sensorDistance;
       input[2] = sensor[7]/sensorDistance;
       input[3] = v.mag()/5;
@@ -650,9 +676,9 @@ class Car {
         brake();
 
       if ((output[3]>output[4])&&(output[3]>output[5]))
-        heading.rotate(radians(-2.5f));
+        heading.rotate(radians(-3));
       else if ((output[4]>output[3])&&(output[4]>output[5]))
-        heading.rotate(radians(2.5f));
+        heading.rotate(radians(3));
     }
   }
   //----------------------------------------------------------------------------------------------------------------
@@ -698,6 +724,21 @@ public PVector lineIntersection(float x1, float y1, float x2, float y2, float x3
     return new PVector(x1 + (uA * (x2-x1)), y1 + (uA * (y2-y1)));
   }
   return null;
+}
+
+//My solution to find angle between Vectors
+public float degreeFloor(float rad){
+  float degree = degrees(rad);
+  while(degree > 360)
+    degree -= 360;
+  while(degree < -360)
+    degree += 360;
+  if(degree < -180)
+    degree = 360 + degree;
+  if(degree > 180)
+    degree = -360 + degree;
+
+  return degree;
 }
 class Matrix {
   float [][] array;
@@ -1073,6 +1114,7 @@ float scroll = 0;
 class NetBoard {
   PGraphics board;
   PGraphics decision;
+  ArrayList<String> messages = new ArrayList<String>();
   int margin = PApplet.parseInt(32 / zoom);
   float boardX       = 0;
   int boardSize      = PApplet.parseInt((width / 4 + margin) / zoom );
@@ -1091,6 +1133,7 @@ class NetBoard {
   public void visualizeNN() {
     image(board, boardX, 0);
     image(decision, boardX + size + margin, 0);
+    float biggestY=0;
     board.beginDraw();
     board.background(51);
     NeuralNetwork nn = cars.get(0).brain;
@@ -1110,6 +1153,8 @@ class NetBoard {
               board.stroke(254, 133, 133, 128 * abs(w));
             board.strokeWeight(1.5f);
             board.line(x, y, xo, yo);
+            if(yo>biggestY)
+              biggestY=yo;
           }
         }
         board.noStroke();
@@ -1123,6 +1168,10 @@ class NetBoard {
         board.text(nf(value, 0, 2), x + 1, y + 5);
       }
     }
+    textMode(CORNER);
+    stroke(255);
+    text("test test", 20, biggestY + 50);
+
     board.endDraw();
     if (nn.perceptrons.size() > 0) {
       Matrix output = nn.perceptrons.get(nn.perceptrons.size() - 1);

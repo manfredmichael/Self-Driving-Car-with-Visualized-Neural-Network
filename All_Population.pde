@@ -18,7 +18,6 @@ class Population {
     alive=0;
     for (Car car : cars) {
       car.move();
-      car.show();
       car.checkCrash();
       car.sense();
       car.think();
@@ -27,6 +26,14 @@ class Population {
       if (!car.dead && car.checkPoint < pointGates.size() - 1)
         alive++;
     }
+
+    if(!showBest){
+      tint(255, 100);
+      for (Car car : cars)
+        car.show();
+      tint(255, 255);
+    }
+    cars.get(0).show();
 
     //displayBestStat();
 
@@ -59,7 +66,7 @@ class Population {
       }
     }
 
-    if (highest>60)
+    if (sqrt(highest)>60)
       roundTime=int(sqrt(highest)/10);
     else
       roundTime=6;
@@ -85,15 +92,15 @@ class Population {
 
     if (parentPool.size()>0) {
     for (int i = 0; i < cars.size(); i++) {
-      // if(i < cars.size() * 3 / 4){
+      if(i < cars.size() * 3 / 4){
         int indexA=floor(random(parentPool.size()));
         cars.get(i).brain=parentPool.get(indexA).brain.copy();
-        // }
-      // else{
-      //   int indexA = floor(random(parentPool.size()));
-      //   int indexB = floor(random(parentPool.size()));
-      //   cars.get(i).brain = parentPool.get(indexA).brain.crossover(parentPool.get(indexB).brain);
-      // }
+        }
+      else{
+        int indexA = floor(random(parentPool.size()));
+        int indexB = floor(random(parentPool.size()));
+        cars.get(i).brain = parentPool.get(indexA).brain.crossover(parentPool.get(indexB).brain);
+      }
       }
     }
 
@@ -111,7 +118,7 @@ class Population {
     best.reset();
     best.think();
     cars.set(0, best.copy());
-    saveBrain();
+    // saveBrain();
   }
 }
 

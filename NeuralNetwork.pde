@@ -164,6 +164,7 @@ float scroll = 0;
 class NetBoard {
   PGraphics board;
   PGraphics decision;
+  ArrayList<String> messages = new ArrayList<String>();
   int margin = int(32 / zoom);
   float boardX       = 0;
   int boardSize      = int((width / 4 + margin) / zoom );
@@ -182,6 +183,7 @@ class NetBoard {
   void visualizeNN() {
     image(board, boardX, 0);
     image(decision, boardX + size + margin, 0);
+    float biggestY=0;
     board.beginDraw();
     board.background(51);
     NeuralNetwork nn = cars.get(0).brain;
@@ -201,6 +203,8 @@ class NetBoard {
               board.stroke(254, 133, 133, 128 * abs(w));
             board.strokeWeight(1.5);
             board.line(x, y, xo, yo);
+            if(yo>biggestY)
+              biggestY=yo;
           }
         }
         board.noStroke();
@@ -214,6 +218,10 @@ class NetBoard {
         board.text(nf(value, 0, 2), x + 1, y + 5);
       }
     }
+    textMode(CORNER);
+    stroke(255);
+    text("test test", 20, biggestY + 50);
+
     board.endDraw();
     if (nn.perceptrons.size() > 0) {
       Matrix output = nn.perceptrons.get(nn.perceptrons.size() - 1);

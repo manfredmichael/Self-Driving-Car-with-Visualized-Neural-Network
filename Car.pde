@@ -12,7 +12,7 @@ class Car {
   float wheelBase=15;
   float steerAngle=0;
   float maxSteer=25;
-  float maxSpeed=10;
+  float maxSpeed=5;
   float traveled;
   int point=0;
   int checkPoint;
@@ -50,6 +50,8 @@ class Car {
       if (rotationSpeed<=-PI)
         rotationSpeed=PI*2+rotationSpeed;
       v.rotate(rotationSpeed/40);
+
+      v.limit(maxSpeed);
       p.add(v);
       traveled+=v.mag();
       v.div(1.005);
@@ -69,12 +71,25 @@ class Car {
     //rect(-10, 0, 45, 20);
     popMatrix();
   }
+
+  void showAsBest() {
+    pushMatrix();
+    translate(p.x, p.y);
+    rotate(heading.heading());
+    stroke(255);    
+    image(carImage, -32, -12);
+    //line(0, -100, 0, 100);
+    //line(-100, 0, 100, 0);
+    //rectMode(CENTER);
+    //fill(255, 100);
+    //rect(-10, 0, 45, 20);
+    popMatrix();
+  }
   //----------------------------------------------------------------------------------
   void throttle() {
     PVector direction=new PVector(0.12, 0);
     direction.rotate(heading.heading());
     v.add(direction);
-    //v.limit(maxSpeed);
   }
 
   void brake() {
@@ -153,7 +168,7 @@ class Car {
       // }
       // input[input.length-1] = v.mag()/5;
 
-      input[0] = sensor[0]/sensorDistance;
+      input[0] = degreeFloor(heading.heading() - v.heading()) / 45;
       input[1] = sensor[1]/sensorDistance;
       input[2] = sensor[7]/sensorDistance;
       input[3] = v.mag()/5;
@@ -166,9 +181,9 @@ class Car {
         brake();
 
       if ((output[3]>output[4])&&(output[3]>output[5]))
-        heading.rotate(radians(-2.5));
+        heading.rotate(radians(-3));
       else if ((output[4]>output[3])&&(output[4]>output[5]))
-        heading.rotate(radians(2.5));
+        heading.rotate(radians(3));
     }
   }
   //----------------------------------------------------------------------------------------------------------------
@@ -214,4 +229,19 @@ PVector lineIntersection(float x1, float y1, float x2, float y2, float x3, float
     return new PVector(x1 + (uA * (x2-x1)), y1 + (uA * (y2-y1)));
   }
   return null;
+}
+
+//My solution to find angle between Vectors
+float degreeFloor(float rad){
+  float degree = degrees(rad);
+  while(degree > 360)
+    degree -= 360;
+  while(degree < -360)
+    degree += 360;
+  if(degree < -180)
+    degree = 360 + degree;
+  if(degree > 180)
+    degree = -360 + degree;
+
+  return degree;
 }
