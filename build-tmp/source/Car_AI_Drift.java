@@ -29,7 +29,7 @@ PVector cameraHeading;
 int [] layer={4, 6, 6};
 
 int clones= 80;
-int roundTime=15;
+int roundTime=5;
 int generation=1;
 
 boolean throttle=false;
@@ -57,6 +57,12 @@ NetBoard netboard;
 public void setup() {
   
   netboard = new NetBoard();
+  // NETBOARD MESSAGES =====
+  netboard.messages.add("Input 1: sudut gerak");
+  netboard.messages.add("Input 2: sensor kanan");
+  netboard.messages.add("Input 3: sensor kiri");
+  netboard.messages.add("Input 4: kecepatan");
+  // =======================
   font=createFont("Calibri", 32);
   textAlign(CENTER);
   frameRate(40);
@@ -380,11 +386,14 @@ class Population {
 
     if(!showBest){
       tint(255, 100);
-      for (Car car : cars)
+      for (Car car : cars) {
         car.show();
+        car.showSensor();
+      }
       tint(255, 255);
     }
     cars.get(0).show();
+    cars.get(0).showSensor();
 
     //displayBestStat();
 
@@ -642,7 +651,12 @@ class Car {
         }
       }
     }
+  }
 
+  public void showSensor(){
+    PVector offset=heading.copy().rotate(PI).setMag(10);
+    PVector center=new PVector(p.x, p.y).add(offset);
+    
     for (int i: new int[]{1, 7}) {
       PVector sensorLine=new PVector(sensor[i], 0).rotate(heading.heading()+(PI/4)*i); 
       PVector sensorPoint=PVector.add(center, sensorLine);
@@ -1133,7 +1147,6 @@ class NetBoard {
   public void visualizeNN() {
     image(board, boardX, 0);
     image(decision, boardX + size + margin, 0);
-    float biggestY=0;
     board.beginDraw();
     board.background(51);
     NeuralNetwork nn = cars.get(0).brain;
@@ -1153,8 +1166,6 @@ class NetBoard {
               board.stroke(254, 133, 133, 128 * abs(w));
             board.strokeWeight(1.5f);
             board.line(x, y, xo, yo);
-            if(yo>biggestY)
-              biggestY=yo;
           }
         }
         board.noStroke();
@@ -1168,9 +1179,14 @@ class NetBoard {
         board.text(nf(value, 0, 2), x + 1, y + 5);
       }
     }
-    textMode(CORNER);
-    stroke(255);
-    text("test test", 20, biggestY + 50);
+    board.textAlign(CORNER);
+    board.textSize(24);
+    board.fill(255);
+    for (int i = 0; i < messages.size(); i++) {
+      board.text(messages.get(i), 10, 240 + 30 * i + scroll);
+    }
+    board.textSize(12);
+    board.textAlign(CENTER);
 
     board.endDraw();
     if (nn.perceptrons.size() > 0) {

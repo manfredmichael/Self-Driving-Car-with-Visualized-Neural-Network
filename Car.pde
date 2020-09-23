@@ -147,7 +147,12 @@ class Car {
         }
       }
     }
+  }
 
+  void showSensor(){
+    PVector offset=heading.copy().rotate(PI).setMag(10);
+    PVector center=new PVector(p.x, p.y).add(offset);
+    
     for (int i: new int[]{1, 7}) {
       PVector sensorLine=new PVector(sensor[i], 0).rotate(heading.heading()+(PI/4)*i); 
       PVector sensorPoint=PVector.add(center, sensorLine);

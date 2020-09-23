@@ -183,7 +183,6 @@ class NetBoard {
   void visualizeNN() {
     image(board, boardX, 0);
     image(decision, boardX + size + margin, 0);
-    float biggestY=0;
     board.beginDraw();
     board.background(51);
     NeuralNetwork nn = cars.get(0).brain;
@@ -203,8 +202,6 @@ class NetBoard {
               board.stroke(254, 133, 133, 128 * abs(w));
             board.strokeWeight(1.5);
             board.line(x, y, xo, yo);
-            if(yo>biggestY)
-              biggestY=yo;
           }
         }
         board.noStroke();
@@ -218,9 +215,14 @@ class NetBoard {
         board.text(nf(value, 0, 2), x + 1, y + 5);
       }
     }
-    textMode(CORNER);
-    stroke(255);
-    text("test test", 20, biggestY + 50);
+    board.textAlign(CORNER);
+    board.textSize(24);
+    board.fill(255);
+    for (int i = 0; i < messages.size(); i++) {
+      board.text(messages.get(i), 10, 240 + 30 * i + scroll);
+    }
+    board.textSize(12);
+    board.textAlign(CENTER);
 
     board.endDraw();
     if (nn.perceptrons.size() > 0) {

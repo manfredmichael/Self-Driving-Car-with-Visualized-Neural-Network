@@ -29,11 +29,14 @@ class Population {
 
     if(!showBest){
       tint(255, 100);
-      for (Car car : cars)
+      for (Car car : cars) {
         car.show();
+        car.showSensor();
+      }
       tint(255, 255);
     }
     cars.get(0).show();
+    cars.get(0).showSensor();
 
     //displayBestStat();
 

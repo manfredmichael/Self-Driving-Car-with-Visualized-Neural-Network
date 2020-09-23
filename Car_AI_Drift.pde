@@ -11,7 +11,7 @@ PVector cameraHeading;
 int [] layer={4, 6, 6};
 
 int clones= 80;
-int roundTime=15;
+int roundTime=5;
 int generation=1;
 
 boolean throttle=false;
@@ -39,6 +39,12 @@ import java.util.*;
 void setup() {
   size(displayWidth,displayHeight,P2D);
   netboard = new NetBoard();
+  // NETBOARD MESSAGES =====
+  netboard.messages.add("Input 1: sudut gerak");
+  netboard.messages.add("Input 2: sensor kanan");
+  netboard.messages.add("Input 3: sensor kiri");
+  netboard.messages.add("Input 4: kecepatan");
+  // =======================
   font=createFont("Calibri", 32);
   textAlign(CENTER);
   frameRate(40);
