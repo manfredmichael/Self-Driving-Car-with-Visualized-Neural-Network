@@ -3,3 +3,9 @@ Multiple neural networks are being trained with genetic algorithm (evolution and
 
 ### Preview
 ![](https://github.com/manfredmichael/Self-Driving-Car-with-Visualized-Neural-Network/blob/master/data/preview.gif?raw=true)
+
+### Key Mapping
+```
+s: show/hide neural network visualization
+b: focus on best agent
+```
